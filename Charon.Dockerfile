@@ -9,9 +9,8 @@ ENV TZ=Australia/Brisbane
 RUN sed --in-place --regexp-extended "s/(\/\/)(archive\.ubuntu)/\1au.\2/" /etc/apt/sources.list
 
 ### Install prerequistes
-RUN apt update --fix-missing
-RUN apt update && apt upgrade -y
-RUN apt install -y build-essential cmake gfortran git flex bison \
+RUN apt update --fix-missing; apt update && apt upgrade -y; \
+    apt install -y build-essential cmake gfortran git flex bison \
     wget curl python python-sip-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev hdf5-tools linux-headers-generic \
     libhdf5-dev netcdf-bin cdftools libnetcdf-dev cmake libopenblas-dev libblas-dev libboost-all-dev screen \
     htop git-lfs vim-scripts build-essential libssl-dev ca-certificates gpg wget libmatio-dev
@@ -24,16 +23,11 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4
 
 ## TriBITS
 WORKDIR /
-RUN git clone https://github.com/TriBITSPub/TriBITS.git
-WORKDIR TriBITS
-RUN git checkout -f 8d696d0bb0
+RUN git clone https://github.com/TriBITSPub/TriBITS.git; cd TriBITS; git checkout -f 8d696d0bb0
 WORKDIR /
-RUN mv TriBITS tribits
-RUN mkdir tribits/build
+RUN mv TriBITS tribits; mkdir tribits/build
 WORKDIR tribits/build
-RUN cmake ..
-RUN make -j24
-RUN make install
+RUN cmake ..; make -j24; make install
 ENV TRIBITS_BASE_DIR='/tribits'
 
 WORKDIR /
@@ -44,10 +38,7 @@ WORKDIR tcad-charon
 RUN cd scripts/charonInterpreter/parseGenerator && python3 generateInterpreter.py
 
 ## Trilinos
-RUN git clone https://github.com/trilinos/Trilinos.git Trilinos
-WORKDIR Trilinos
-RUN git checkout 81e9581a3c5
-
+RUN git clone https://github.com/trilinos/Trilinos.git Trilinos; cd Trilinos; git checkout 81e9581a3c5
 RUN mkdir build; cd build; cmake -DTrilinos_ENABLE_ALL_PACKAGES=ON -DCMAKE_INSTALL_PREFIX=/usr/local/ ..; \
     cmake -DTPL_ENABLE_Matio=OFF -DCMAKE_INSTALL_PREFIX=/usr/local/ .; \
     make -j$(nproc); \
